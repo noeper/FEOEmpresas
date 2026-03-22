@@ -1,0 +1,12 @@
+# Datos — contienen información personal/empresarial
+*.ods
+
+# Entorno virtual Python
+.venv/
+
+# Dependencias Node
+node_modules/
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
