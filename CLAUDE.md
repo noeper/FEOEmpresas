@@ -48,7 +48,7 @@ C:/Users/Noemi/AppData/Local/Programs/Python/Python314/python.exe -m streamlit r
 
 **Regimen** (col 0): Presencial, En remoto, Híbrido
 
-**Estado_empresa** (col 0): Descartada, Empresa nueva, Sin respuesta, No interesada, Empresa potencial (solicita información), Empresa potencial (interés futuro), Colaboró anteriormente, Está colaborando
+**Estado_empresa** (col 0): Descartada, Empresa nueva, Sin respuesta, No interesada, Empresa potencial (solicita información), Empresa potencial (interés futuro), Colaboró anteriormente, Colabora, Pendiente de respuesta
 
 
 ## Lectura del ODS
@@ -85,6 +85,4 @@ sheet_empresas = sheets[0]  # índice 0 = Empresas
 empresas.ods         # datos — NO modificar a mano mientras la app está abierta
 app.py               # entrada principal Streamlit
 ods_handler.py       # lectura y escritura del ODS
-enrich_empresas.py   # enriquece descripcion vía scraping web
-scrape_empresas.js   # scraper Node.js llamado por enrich_empresas.py
 ```

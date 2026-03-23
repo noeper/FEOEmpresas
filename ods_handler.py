@@ -28,6 +28,9 @@ COLUMNS = [
     'descripcion',
 ]
 
+INTERACCIONES_COLS = ['id_empresa', 'tipo', 'descripcion', 'fecha', 'profesor']
+NUM_ESTUDIANTES_COLS = ['id_empresa', 'num_alumnos', 'grupo']
+
 
 def _cell_value(cell):
     """Extrae el texto de una celda ODS. Devuelve cadena vacía si la celda no tiene contenido."""
@@ -35,17 +38,17 @@ def _cell_value(cell):
     return str(ps[0]) if ps else ''
 
 
-def _row_to_list(row):
-    """Expande celdas repetidas y devuelve una lista de valores ajustada a `NUM_COLS`."""
+def _row_to_list(row, n_cols=NUM_COLS):
+    """Expande celdas repetidas y devuelve una lista de valores ajustada a `n_cols`."""
     values = []
     for cell in row.getElementsByType(TableCell):
         repeat = cell.getAttribute('numbercolumnsrepeated')
         n = int(repeat) if repeat else 1
         val = _cell_value(cell)
         values.extend([val] * n)
-    if len(values) < NUM_COLS:
-        values.extend([''] * (NUM_COLS - len(values)))
-    return values[:NUM_COLS]
+    if len(values) < n_cols:
+        values.extend([''] * (n_cols - len(values)))
+    return values[:n_cols]
 
 
 def _make_row(values):
@@ -112,11 +115,90 @@ def read_lookup(sheet_index):
 
 def read_all_lookups():
     """Devuelve un dict con todas las tablas de referencia del ODS.
-    Claves: estado_empresa, localizacion, regimen, profesor.
+    Claves: estado_empresa, localizacion, regimen, profesor, tipo_interaccion, grupo_estudiantes.
+    Devuelve lista vacía para cualquier hoja que no exista en el fichero.
     """
+    def _safe(idx):
+        try:
+            return read_lookup(idx)
+        except IndexError:
+            return []
+
     return {
-        'estado_empresa':  read_lookup(4),
-        'localizacion':    read_lookup(1),
-        'regimen':         read_lookup(3),
-        'profesor':        read_lookup(2),
+        'estado_empresa':    _safe(4),
+        'localizacion':      _safe(1),
+        'regimen':           _safe(3),
+        'profesor':          _safe(2),
+        'tipo_interaccion':  _safe(6),
+        'grupo_estudiantes': _safe(8),
     }
+
+
+def read_interacciones():
+    """Devuelve todos los registros de la hoja Interacciones como lista de dicts. Omite filas vacías."""
+    doc = load(ODS_PATH)
+    sheet = doc.spreadsheet.getElementsByType(Table)[5]
+    rows = sheet.getElementsByType(TableRow)
+    result = []
+    for row in rows[1:]:  # skip header
+        vals = _row_to_list(row, len(INTERACCIONES_COLS))
+        if any(vals):
+            result.append(dict(zip(INTERACCIONES_COLS, vals)))
+    return result
+
+
+def write_interacciones(interacciones):
+    """Sobrescribe la hoja Interacciones con la lista recibida. Crea backup antes de guardar."""
+    backup = ODS_PATH.replace(
+        '.ods',
+        f'_backup_{datetime.now().strftime("%Y%m%d_%H%M%S")}.ods'
+    )
+    shutil.copy2(ODS_PATH, backup)
+
+    doc = load(ODS_PATH)
+    sheet = doc.spreadsheet.getElementsByType(Table)[5]
+    rows = sheet.getElementsByType(TableRow)
+
+    for row in list(rows[1:]):
+        sheet.removeChild(row)
+
+    for interaccion in interacciones:
+        vals = [interaccion.get(col, '') or '' for col in INTERACCIONES_COLS]
+        sheet.addElement(_make_row(vals))
+
+    doc.save(ODS_PATH)
+
+
+def read_num_estudiantes():
+    """Devuelve todos los registros de la hoja Num_estudiantes como lista de dicts. Omite filas vacías."""
+    doc = load(ODS_PATH)
+    sheet = doc.spreadsheet.getElementsByType(Table)[7]
+    rows = sheet.getElementsByType(TableRow)
+    result = []
+    for row in rows[1:]:  # skip header
+        vals = _row_to_list(row, len(NUM_ESTUDIANTES_COLS))
+        if any(vals):
+            result.append(dict(zip(NUM_ESTUDIANTES_COLS, vals)))
+    return result
+
+
+def write_num_estudiantes(registros):
+    """Sobrescribe la hoja Num_estudiantes con la lista recibida. Crea backup antes de guardar."""
+    backup = ODS_PATH.replace(
+        '.ods',
+        f'_backup_{datetime.now().strftime("%Y%m%d_%H%M%S")}.ods'
+    )
+    shutil.copy2(ODS_PATH, backup)
+
+    doc = load(ODS_PATH)
+    sheet = doc.spreadsheet.getElementsByType(Table)[7]
+    rows = sheet.getElementsByType(TableRow)
+
+    for row in list(rows[1:]):
+        sheet.removeChild(row)
+
+    for registro in registros:
+        vals = [registro.get(col, '') or '' for col in NUM_ESTUDIANTES_COLS]
+        sheet.addElement(_make_row(vals))
+
+    doc.save(ODS_PATH)
