@@ -1,175 +1,87 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="utf-8">
-    <title>Reenvío información formación en empresa</title>
-    <style>
-      body {
-        margin: 0;
-        background: #f4f6f8;
-        font-family: Georgia, "Times New Roman", serif;
-        color: #24323f;
-      }
-      .wrap {
-        max-width: 760px;
-        margin: 0 auto;
-        padding: 24px;
-      }
-      .card {
-        background: #ffffff;
-        border-radius: 18px;
-        border: 1px solid rgba(36, 50, 63, 0.08);
-        box-shadow: 0 16px 36px rgba(36, 50, 63, 0.08);
-        overflow: hidden;
-      }
-      .hero {
-        padding: 26px 30px 20px;
-        background:
-          radial-gradient(circle at top right, rgba(26, 122, 191, 0.18), transparent 38%),
-          linear-gradient(135deg, #113247 0%, #1a7abf 100%);
-        color: #ffffff;
-      }
-      .kicker {
-        font-family: "Segoe UI", Arial, sans-serif;
-        font-size: 12px;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        opacity: 0.82;
-        margin-bottom: 10px;
-      }
-      .title {
-        margin: 0;
-        font-size: 28px;
-        line-height: 1.15;
-      }
-      .body {
-        padding: 28px 30px 32px;
-        font-size: 16px;
-        line-height: 1.7;
-      }
-      .body p {
-        margin: 0 0 16px;
-      }
-      .grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 16px;
-        margin: 22px 0;
-      }
-      .box {
-        padding: 18px;
-        border-radius: 14px;
-        background: #f8fafc;
-        border: 1px solid rgba(18, 52, 77, 0.08);
-      }
-      .box h3 {
-        margin: 0 0 8px;
-        font-family: "Segoe UI", Arial, sans-serif;
-        font-size: 14px;
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
-        color: #155f96;
-      }
-      .box p,
-      .box li {
-        margin: 0;
-        font-size: 15px;
-      }
-      .box ul {
-        margin: 0;
-        padding-left: 18px;
-      }
-      .note {
-        margin: 22px 0;
-        padding: 18px 20px;
-        border-left: 4px solid #1a7abf;
-        background: rgba(26, 122, 191, 0.06);
-        border-radius: 0 12px 12px 0;
-      }
-      .footer {
-        margin-top: 26px;
-        padding-top: 18px;
-        border-top: 1px solid rgba(36, 50, 63, 0.1);
-        font-size: 14px;
-        color: #52606d;
-      }
-      .footer strong {
-        color: #113247;
-      }
-      a {
-        color: #155f96;
-      }
-      @media (max-width: 720px) {
-        .wrap {
-          padding: 10px;
-        }
-        .hero,
-        .body {
-          padding: 20px;
-        }
-        .grid {
-          grid-template-columns: 1fr;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <div class="wrap">
-      <div class="card">
-        <div class="hero">
-          <div class="kicker">IES Puerto de la Cruz Telesforo Bravo</div>
-          <h1 class="title">Información sobre formación en empresa</h1>
-        </div>
-        <div class="body">
-          <p>Buenos días,</p>
-
-          <p>
-            Tal y como hemos acordado, les reenviamos de nuevo la información relativa a la formación en empresa de nuestro centro.
-          </p>
-
-          <div class="grid">
-            <div class="box">
-              <h3>Ciclos que impartimos</h3>
-              <ul>
-                <li><strong>ASIR</strong> · Administración de Sistemas Informáticos en Red</li>
-                <li><strong>DAM</strong> · Desarrollo de Aplicaciones Multiplataforma</li>
-                <li><strong>DAW</strong> · Desarrollo de Aplicaciones Web</li>
-              </ul>
-            </div>
-            <div class="box">
-              <h3>Fechas de prácticas</h3>
-              <p><strong>1º:</strong> {calendario_primero}</p>
-              <p><strong>2º:</strong> {calendario_segundo}</p>
-            </div>
-          </div>
-
-          <div class="box">
-            <h3>Perfiles de GitHub del alumnado</h3>
-            <ul>
-              <li><a href="https://github.com/xxx">https://github.com/xxx</a></li>
-              <li><a href="https://github.com/yyy">https://github.com/yyy</a></li>
-              <li><a href="https://github.com/zzz">https://github.com/zzz</a></li>
-            </ul>
-          </div>
-
-          <div class="note">
-            Recordamos brevemente que, si su organización lo contempla, la formación en empresa puede desarrollarse también en modalidad remota.
-          </div>
-
-          <p>
-            Quedamos a su disposición para cualquier aclaración adicional.
-          </p>
-
-          <p>Reciban un cordial saludo,</p>
-
-          <div class="footer">
-            <strong>IES Puerto de la Cruz Telesforo Bravo</strong><br>
-            C/ Las Cabezas, 7 · 38400 Puerto de la Cruz · Santa Cruz de Tenerife<br>
-            <a href="mailto:38003999@gobiernodecanarias.org">38003999@gobiernodecanarias.org</a><br>
-            <a href="https://iespto.es/">https://iespto.es/</a> · 922 38 01 12
-          </div>
-        </div>
-      </div>
-    </div>
+  <body style="margin:0; padding:0; background-color:#f4f6f8; font-family:Georgia, 'Times New Roman', serif; color:#24323f;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%; border-collapse:collapse; background-color:#f4f6f8; margin:0; padding:0;">
+      <tr>
+        <td align="center" style="padding:24px 12px;">
+          <table role="presentation" width="760" cellspacing="0" cellpadding="0" border="0" style="width:760px; max-width:760px; border-collapse:separate; background-color:#ffffff; border:1px solid #d9e1e8; border-radius:18px; overflow:hidden;">
+            <tr>
+              <td style="padding:26px 30px 20px 30px; background-color:#113247; background-image:linear-gradient(135deg, #113247 0%, #1a7abf 100%); color:#ffffff;">
+                <div style="font-family:'Segoe UI', Arial, sans-serif; font-size:12px; letter-spacing:0.12em; text-transform:uppercase; opacity:0.82; margin:0 0 10px 0;">IES Puerto de la Cruz Telesforo Bravo</div>
+                <div style="margin:0; font-size:28px; line-height:1.15; font-weight:700;">Información sobre formación en empresa</div>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:28px 30px 32px 30px; font-size:16px; line-height:1.7; color:#24323f;">
+                <p style="margin:0 0 16px 0;">Buenos días,</p>
+                <p style="margin:0 0 16px 0;">
+                  Tal y como hemos acordado, les reenviamos de nuevo la información relativa a la formación en empresa de nuestro centro.
+                </p>
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%; border-collapse:separate; margin:22px 0 16px 0;">
+                  <tr>
+                    <td valign="top" width="50%" style="width:50%; padding:0 8px 0 0;">
+                      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%; border-collapse:separate; background-color:#f8fafc; border:1px solid #d9e1e8; border-radius:14px;">
+                        <tr>
+                          <td style="padding:18px;">
+                            <div style="margin:0 0 8px 0; font-family:'Segoe UI', Arial, sans-serif; font-size:14px; letter-spacing:0.04em; text-transform:uppercase; color:#155f96; font-weight:700;">Ciclos que impartimos</div>
+                            <ul style="margin:0; padding-left:18px; font-size:15px; line-height:1.6;">
+                              <li><strong>ASIR</strong> · Administración de Sistemas Informáticos en Red</li>
+                              <li><strong>DAM</strong> · Desarrollo de Aplicaciones Multiplataforma</li>
+                              <li><strong>DAW</strong> · Desarrollo de Aplicaciones Web</li>
+                            </ul>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                    <td valign="top" width="50%" style="width:50%; padding:0 0 0 8px;">
+                      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%; border-collapse:separate; background-color:#f8fafc; border:1px solid #d9e1e8; border-radius:14px;">
+                        <tr>
+                          <td style="padding:18px;">
+                            <div style="margin:0 0 8px 0; font-family:'Segoe UI', Arial, sans-serif; font-size:14px; letter-spacing:0.04em; text-transform:uppercase; color:#155f96; font-weight:700;">Fechas de prácticas</div>
+                            <p style="margin:0 0 8px 0; font-size:15px; line-height:1.6;"><strong>1º:</strong> {calendario_primero}</p>
+                            <p style="margin:0; font-size:15px; line-height:1.6;"><strong>2º:</strong> {calendario_segundo}</p>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%; border-collapse:separate; margin:0 0 22px 0; background-color:#f8fafc; border:1px solid #d9e1e8; border-radius:14px;">
+                  <tr>
+                    <td style="padding:18px;">
+                      <div style="margin:0 0 8px 0; font-family:'Segoe UI', Arial, sans-serif; font-size:14px; letter-spacing:0.04em; text-transform:uppercase; color:#155f96; font-weight:700;">Perfiles de GitHub del alumnado</div>
+                      <ul style="margin:0; padding-left:18px; font-size:15px; line-height:1.6;">
+                        <li><a href="https://github.com/xxx" style="color:#155f96; text-decoration:underline;">https://github.com/xxx</a></li>
+                        <li><a href="https://github.com/yyy" style="color:#155f96; text-decoration:underline;">https://github.com/yyy</a></li>
+                        <li><a href="https://github.com/zzz" style="color:#155f96; text-decoration:underline;">https://github.com/zzz</a></li>
+                      </ul>
+                    </td>
+                  </tr>
+                </table>
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%; border-collapse:separate; margin:0 0 22px 0; background-color:#f2f8fc; border-left:4px solid #1a7abf; border-radius:0 12px 12px 0;">
+                  <tr>
+                    <td style="padding:18px 20px; font-size:16px; line-height:1.7; color:#24323f;">
+                      Recordamos brevemente que, si su organización lo contempla, la formación en empresa puede desarrollarse también en modalidad remota.
+                    </td>
+                  </tr>
+                </table>
+                <p style="margin:0 0 16px 0;">Quedamos a su disposición para cualquier aclaración adicional.</p>
+                <p style="margin:0;">Reciban un cordial saludo,</p>
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%; border-collapse:collapse; margin-top:26px; border-top:1px solid #d9e1e8;">
+                  <tr>
+                    <td style="padding-top:18px; font-size:14px; line-height:1.7; color:#52606d;">
+                      <strong style="color:#113247;">IES Puerto de la Cruz Telesforo Bravo</strong><br>
+                      C/ Las Cabezas, 7 · 38400 Puerto de la Cruz · Santa Cruz de Tenerife<br>
+                      <a href="mailto:38003999@gobiernodecanarias.org" style="color:#155f96; text-decoration:underline;">38003999@gobiernodecanarias.org</a><br>
+                      <a href="https://iespto.es/" style="color:#155f96; text-decoration:underline;">https://iespto.es/</a> · 922 38 01 12
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
   </body>
 </html>

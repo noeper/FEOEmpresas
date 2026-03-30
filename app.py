@@ -21,7 +21,6 @@ st.set_page_config(page_title="Empresas", layout="wide")
 
 MAIL_TEMPLATES_DIR = Path(__file__).with_name('mail_templates')
 APP_SETTINGS_PATH = Path(__file__).with_name('app_settings.json')
-INITIAL_MAIL_HTML_PATH = Path(__file__).with_name('correo-inicial.html')
 DEFAULT_APP_SETTINGS = {
     'calendario_primero_inicio': '',
     'calendario_primero_fin': '',
@@ -83,8 +82,6 @@ def load_mail_templates():
             html_path = None
             if data.get('html_file'):
                 html_path = MAIL_TEMPLATES_DIR / str(data['html_file'])
-            elif data.get('id') == 'primer_contacto' and INITIAL_MAIL_HTML_PATH.exists():
-                html_path = INITIAL_MAIL_HTML_PATH
             if html_path and html_path.exists():
                 try:
                     data['html_body'] = html_path.read_text(encoding='utf-8')
@@ -778,9 +775,10 @@ def render_interacciones_timeline(df_interacciones, estado_empresa=''):
                     dialog_eliminar_interaccion()
 
 
-def clipboard_button(label, text, key, help_text=None):
-    """Renderiza un botón HTML que copia texto al portapapeles sin depender del estado de Streamlit."""
+def clipboard_button(label, text, key, help_text=None, html_text=None):
+    """Renderiza un botón HTML que copia texto plano o HTML enriquecido al portapapeles."""
     payload = json.dumps(text)
+    html_payload = json.dumps(html_text) if html_text is not None else 'null'
     button_id = re.sub(r'[^a-zA-Z0-9_-]', '_', key)
     help_attr = f'title="{html.escape(help_text)}"' if help_text else ''
     button_label = html.escape(label)
@@ -813,8 +811,17 @@ def clipboard_button(label, text, key, help_text=None):
         <script>
         async function copy_{button_id}() {{
             const text = {payload};
+            const htmlText = {html_payload};
             try {{
-                await navigator.clipboard.writeText(text);
+                if (htmlText && window.ClipboardItem && navigator.clipboard.write) {{
+                    const item = new ClipboardItem({{
+                        'text/plain': new Blob([text], {{ type: 'text/plain' }}),
+                        'text/html': new Blob([htmlText], {{ type: 'text/html' }})
+                    }});
+                    await navigator.clipboard.write([item]);
+                }} else {{
+                    await navigator.clipboard.writeText(text);
+                }}
             }} catch (e) {{
                 const ta = document.createElement('textarea');
                 ta.value = text;
@@ -2084,7 +2091,12 @@ with tab_empresas:
                 with c_copy_1:
                     clipboard_button("📋 Copiar asunto", subject_value, f"copy_subject_{empresa_id}")
                 with c_copy_2:
-                    clipboard_button("📋 Copiar cuerpo", body_copy_value, f"copy_body_{empresa_id}")
+                    clipboard_button(
+                        "📋 Copiar cuerpo",
+                        rendered_mail.get('html_body') or rendered_mail['body'],
+                        f"copy_body_{empresa_id}",
+                        html_text=rendered_mail.get('html_body') or None,
+                    )
                 with c_copy_3:
                     clipboard_button(
                         "📋 Copiar todo",

@@ -1,127 +1,45 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="utf-8">
-    <title>Seguimiento próximo curso</title>
-    <style>
-      body {
-        margin: 0;
-        background: #f4f6f8;
-        font-family: Georgia, "Times New Roman", serif;
-        color: #24323f;
-      }
-      .wrap {
-        max-width: 720px;
-        margin: 0 auto;
-        padding: 24px;
-      }
-      .card {
-        background: #ffffff;
-        border-radius: 18px;
-        border: 1px solid rgba(36, 50, 63, 0.08);
-        box-shadow: 0 16px 36px rgba(36, 50, 63, 0.08);
-        overflow: hidden;
-      }
-      .hero {
-        padding: 26px 30px 20px;
-        background:
-          radial-gradient(circle at top right, rgba(90, 103, 216, 0.18), transparent 38%),
-          linear-gradient(135deg, #113247 0%, #1a7abf 100%);
-        color: #ffffff;
-      }
-      .kicker {
-        font-family: "Segoe UI", Arial, sans-serif;
-        font-size: 12px;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        opacity: 0.82;
-        margin-bottom: 10px;
-      }
-      .title {
-        margin: 0;
-        font-size: 28px;
-        line-height: 1.15;
-      }
-      .body {
-        padding: 28px 30px 32px;
-        font-size: 16px;
-        line-height: 1.7;
-      }
-      .body p {
-        margin: 0 0 16px;
-      }
-      .highlight {
-        display: inline-block;
-        padding: 2px 8px;
-        border-radius: 999px;
-        background: rgba(90, 103, 216, 0.14);
-        color: #3f4bb5;
-        font-family: "Segoe UI", Arial, sans-serif;
-        font-size: 14px;
-        font-weight: 700;
-      }
-      .footer {
-        margin-top: 26px;
-        padding-top: 18px;
-        border-top: 1px solid rgba(36, 50, 63, 0.1);
-        font-size: 14px;
-        color: #52606d;
-      }
-      .footer strong {
-        color: #113247;
-      }
-      a {
-        color: #155f96;
-      }
-      @media (max-width: 720px) {
-        .wrap {
-          padding: 10px;
-        }
-        .hero,
-        .body {
-          padding: 20px;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <div class="wrap">
-      <div class="card">
-        <div class="hero">
-          <div class="kicker">IES Puerto de la Cruz Telesforo Bravo</div>
-          <h1 class="title">Gracias por su respuesta</h1>
-        </div>
-        <div class="body">
-          <p>Buenos días,</p>
-
-          <p>
-            Muchas gracias por su respuesta y por la atención prestada a nuestra propuesta de colaboración con
-            <span class="highlight">{nombre_empresa}</span>.
-          </p>
-
-          <p>
-            Entendemos que en este momento tengan cubierto el cupo de alumnado.
-          </p>
-
-          <p>
-            Si les parece bien, volveremos a contactar con ustedes el próximo curso por si entonces pudiera surgir la posibilidad
-            de colaborar.
-          </p>
-
-          <p>
-            Ojalá más adelante haya suerte y esa colaboración pueda llegar a materializarse.
-          </p>
-
-          <p>Reciban un cordial saludo,</p>
-
-          <div class="footer">
-            <strong>IES Puerto de la Cruz Telesforo Bravo</strong><br>
-            C/ Las Cabezas, 7 · 38400 Puerto de la Cruz · Santa Cruz de Tenerife<br>
-            <a href="mailto:38003999@gobiernodecanarias.org">38003999@gobiernodecanarias.org</a><br>
-            <a href="https://iespto.es/">https://iespto.es/</a> · 922 38 01 12
-          </div>
-        </div>
-      </div>
-    </div>
+  <body style="margin:0; padding:0; background-color:#f4f6f8; font-family:Georgia, 'Times New Roman', serif; color:#24323f;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%; border-collapse:collapse; background-color:#f4f6f8; margin:0; padding:0;">
+      <tr>
+        <td align="center" style="padding:24px 12px;">
+          <table role="presentation" width="720" cellspacing="0" cellpadding="0" border="0" style="width:720px; max-width:720px; border-collapse:separate; background-color:#ffffff; border:1px solid #d9e1e8; border-radius:18px; overflow:hidden;">
+            <tr>
+              <td style="padding:26px 30px 20px 30px; background-color:#113247; background-image:linear-gradient(135deg, #113247 0%, #1a7abf 100%); color:#ffffff;">
+                <div style="font-family:'Segoe UI', Arial, sans-serif; font-size:12px; letter-spacing:0.12em; text-transform:uppercase; opacity:0.82; margin:0 0 10px 0;">IES Puerto de la Cruz Telesforo Bravo</div>
+                <div style="margin:0; font-size:28px; line-height:1.15; font-weight:700;">Gracias por su respuesta</div>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:28px 30px 32px 30px; font-size:16px; line-height:1.7; color:#24323f;">
+                <p style="margin:0 0 16px 0;">Buenos días,</p>
+                <p style="margin:0 0 16px 0;">
+                  Muchas gracias por su respuesta y por la atención prestada a nuestra propuesta de colaboración con
+                  <span style="display:inline-block; padding:2px 8px; border-radius:999px; background-color:#e7eaf8; color:#3f4bb5; font-family:'Segoe UI', Arial, sans-serif; font-size:14px; font-weight:700;">{nombre_empresa}</span>.
+                </p>
+                <p style="margin:0 0 16px 0;">Entendemos que en este momento tengan cubierto el cupo de alumnado.</p>
+                <p style="margin:0 0 16px 0;">
+                  Si les parece bien, volveremos a contactar con ustedes el próximo curso por si entonces pudiera surgir la posibilidad
+                  de colaborar.
+                </p>
+                <p style="margin:0 0 16px 0;">Ojalá más adelante haya suerte y esa colaboración pueda llegar a materializarse.</p>
+                <p style="margin:0;">Reciban un cordial saludo,</p>
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%; border-collapse:collapse; margin-top:26px; border-top:1px solid #d9e1e8;">
+                  <tr>
+                    <td style="padding-top:18px; font-size:14px; line-height:1.7; color:#52606d;">
+                      <strong style="color:#113247;">IES Puerto de la Cruz Telesforo Bravo</strong><br>
+                      C/ Las Cabezas, 7 · 38400 Puerto de la Cruz · Santa Cruz de Tenerife<br>
+                      <a href="mailto:38003999@gobiernodecanarias.org" style="color:#155f96; text-decoration:underline;">38003999@gobiernodecanarias.org</a><br>
+                      <a href="https://iespto.es/" style="color:#155f96; text-decoration:underline;">https://iespto.es/</a> · 922 38 01 12
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
   </body>
 </html>
