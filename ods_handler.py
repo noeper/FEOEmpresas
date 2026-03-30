@@ -7,6 +7,7 @@ from odf.table import Table, TableRow, TableCell
 from odf.text import P
 
 ODS_PATH = os.path.join(os.path.dirname(__file__), 'empresas.ods')
+BACKUP_DIR = os.path.join(os.path.dirname(__file__), 'backups')
 
 NUM_COLS = 16
 COLUMNS = [
@@ -29,7 +30,7 @@ COLUMNS = [
 ]
 
 INTERACCIONES_COLS = ['id_empresa', 'tipo', 'descripcion', 'fecha', 'profesor']
-NUM_ESTUDIANTES_COLS = ['id_empresa', 'num_alumnos', 'grupo']
+NUM_ESTUDIANTES_COLS = ['id_empresa', 'num_alumnos', 'grupo', 'anio']
 
 
 def _cell_value(cell):
@@ -62,6 +63,23 @@ def _make_row(values):
     return row
 
 
+def _create_ods_backup():
+    """Crea una copia de seguridad del ODS en la carpeta `backups` y devuelve su ruta."""
+    os.makedirs(BACKUP_DIR, exist_ok=True)
+    backup_name = f'empresas_backup_{datetime.now().strftime("%Y%m%d_%H%M%S")}.ods'
+    backup_path = os.path.join(BACKUP_DIR, backup_name)
+    shutil.copy2(ODS_PATH, backup_path)
+    return backup_path
+
+
+def _replace_sheet_header(sheet, headers):
+    """Reemplaza la fila de cabecera de una hoja por los encabezados indicados."""
+    rows = sheet.getElementsByType(TableRow)
+    if rows:
+        sheet.removeChild(rows[0])
+    sheet.insertBefore(_make_row(headers), sheet.firstChild)
+
+
 def read_empresas():
     """Devuelve una lista de empresas como diccionarios y omite filas vacías."""
     doc = load(ODS_PATH)
@@ -77,11 +95,7 @@ def read_empresas():
 
 def write_empresas(empresas):
     """Sobrescribe la hoja Empresas con la lista recibida y crea un backup antes de guardar."""
-    backup = ODS_PATH.replace(
-        '.ods',
-        f'_backup_{datetime.now().strftime("%Y%m%d_%H%M%S")}.ods'
-    )
-    shutil.copy2(ODS_PATH, backup)
+    _create_ods_backup()
 
     doc = load(ODS_PATH)
     sheet = doc.spreadsheet.getElementsByType(Table)[0]
@@ -149,11 +163,7 @@ def read_interacciones():
 
 def write_interacciones(interacciones):
     """Sobrescribe la hoja Interacciones con la lista recibida. Crea backup antes de guardar."""
-    backup = ODS_PATH.replace(
-        '.ods',
-        f'_backup_{datetime.now().strftime("%Y%m%d_%H%M%S")}.ods'
-    )
-    shutil.copy2(ODS_PATH, backup)
+    _create_ods_backup()
 
     doc = load(ODS_PATH)
     sheet = doc.spreadsheet.getElementsByType(Table)[5]
@@ -184,14 +194,13 @@ def read_num_estudiantes():
 
 def write_num_estudiantes(registros):
     """Sobrescribe la hoja Num_estudiantes con la lista recibida. Crea backup antes de guardar."""
-    backup = ODS_PATH.replace(
-        '.ods',
-        f'_backup_{datetime.now().strftime("%Y%m%d_%H%M%S")}.ods'
-    )
-    shutil.copy2(ODS_PATH, backup)
+    _create_ods_backup()
 
     doc = load(ODS_PATH)
     sheet = doc.spreadsheet.getElementsByType(Table)[7]
+    rows = sheet.getElementsByType(TableRow)
+
+    _replace_sheet_header(sheet, ['ID_EMPRESA', 'NUM_ALUMNOS', 'GRUPO', 'AÑO'])
     rows = sheet.getElementsByType(TableRow)
 
     for row in list(rows[1:]):

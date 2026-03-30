@@ -23,17 +23,25 @@ Librería de Python para leer y escribir ficheros en formato OpenDocument (`.ods
 
 ## Requisitos
 
-- Python 3.14 instalado en `C:/Users/Noemi/AppData/Local/Programs/Python/Python314/`
-- Las librerías `streamlit`, `pandas` y `odfpy` instaladas:
+- Python 3 instalado y disponible en el entorno actual
+- Dependencias Python: `streamlit`, `pandas` y `odfpy`
 
 ```bash
-python -m pip install streamlit pandas odfpy
+pip install -r requirements.txt
 ```
 
 ## Cómo ejecutar
 
+En Windows:
+
 ```bash
-C:/Users/Noemi/AppData/Local/Programs/Python/Python314/python.exe -m streamlit run app.py
+python -m streamlit run app.py
+```
+
+En Linux o WSL:
+
+```bash
+python3 -m streamlit run app.py
 ```
 
 Se abrirá automáticamente en el navegador en `http://localhost:8501`.
@@ -52,7 +60,7 @@ README.md           # este fichero
 
 ## Copias de seguridad
 
-Cada vez que se guarda un cambio, la aplicación crea automáticamente una copia del fichero con la fecha y hora en el nombre (por ejemplo `empresas_backup_20260313_103045.ods`).
+Cada vez que se guarda un cambio, la aplicación crea automáticamente una copia del fichero en la carpeta `backups/` con la fecha y hora en el nombre (por ejemplo `backups/empresas_backup_20260313_103045.ods`).
 
 ## Enriquecimiento masivo
 

@@ -1,8 +1,10 @@
 # Datos — contienen información personal/empresarial
 *.ods
+*.ods.bak
 
 # Entorno virtual Python
 .venv/
+__pycache__/
 
 # Dependencias Node
 node_modules/
@@ -10,3 +12,9 @@ node_modules/
 # Archivos de sistema
 .DS_Store
 Thumbs.db
+
+# Artefactos locales
+.playwright-mcp/
+.claude/
+.~lock.*
+backups/

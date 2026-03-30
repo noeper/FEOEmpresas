@@ -1,0 +1,7 @@
+{
+  "id": "seguimiento_proximo_curso",
+  "label": "Seguimiento próximo curso",
+  "subject": "Gracias por su respuesta, {nombre_empresa}",
+  "body": "Buenos días:\n\nMuchas gracias por su respuesta y por la atención prestada a nuestra propuesta de colaboración con {nombre_empresa}.\n\nEntendemos que en este momento tengan cubierto el cupo de alumnado.\n\nSi les parece bien, volveremos a contactar con ustedes el próximo curso por si entonces pudiera surgir la posibilidad de colaborar.\n\nOjalá más adelante haya suerte y esa colaboración pueda llegar a materializarse.\n\nReciban un cordial saludo,\n\nIES Puerto de la Cruz Telesforo Bravo\nC/ Las Cabezas, 7\n38400 Puerto de la Cruz\nSanta Cruz de Tenerife\n\n38003999@gobiernodecanarias.org\nhttps://iespto.es/\n922 38 01 12",
+  "html_file": "seguimiento_proximo_curso.html"
+}

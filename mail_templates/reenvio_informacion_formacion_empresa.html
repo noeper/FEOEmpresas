@@ -2,83 +2,67 @@
 <html lang="es">
   <head>
     <meta charset="utf-8">
-    <title>Primer contacto</title>
+    <title>Reenvío información formación en empresa</title>
     <style>
       body {
         margin: 0;
-        background: #f3f5f7;
+        background: #f4f6f8;
         font-family: Georgia, "Times New Roman", serif;
-        color: #1f2933;
+        color: #24323f;
       }
-      .mail-wrap {
+      .wrap {
         max-width: 760px;
         margin: 0 auto;
         padding: 24px;
       }
-      .mail-card {
+      .card {
         background: #ffffff;
-        border: 1px solid rgba(31, 41, 51, 0.08);
         border-radius: 18px;
+        border: 1px solid rgba(36, 50, 63, 0.08);
+        box-shadow: 0 16px 36px rgba(36, 50, 63, 0.08);
         overflow: hidden;
-        box-shadow: 0 16px 40px rgba(31, 41, 51, 0.08);
       }
-      .mail-hero {
-        padding: 28px 32px 20px;
+      .hero {
+        padding: 26px 30px 20px;
         background:
-          radial-gradient(circle at top left, rgba(26, 122, 191, 0.18), transparent 40%),
-          linear-gradient(135deg, #12344d 0%, #1a7abf 100%);
+          radial-gradient(circle at top right, rgba(26, 122, 191, 0.18), transparent 38%),
+          linear-gradient(135deg, #113247 0%, #1a7abf 100%);
         color: #ffffff;
       }
-      .mail-kicker {
+      .kicker {
         font-family: "Segoe UI", Arial, sans-serif;
         font-size: 12px;
         letter-spacing: 0.12em;
         text-transform: uppercase;
-        opacity: 0.8;
+        opacity: 0.82;
         margin-bottom: 10px;
       }
-      .mail-title {
+      .title {
         margin: 0;
-        font-size: 30px;
+        font-size: 28px;
         line-height: 1.15;
       }
-      .mail-subtitle {
-        margin: 12px 0 0;
+      .body {
+        padding: 28px 30px 32px;
         font-size: 16px;
-        line-height: 1.5;
-        max-width: 620px;
-      }
-      .mail-body {
-        padding: 28px 32px 32px;
         line-height: 1.7;
-        font-size: 16px;
       }
-      .mail-body p {
+      .body p {
         margin: 0 0 16px;
       }
-      .mail-highlight {
-        display: inline-block;
-        padding: 2px 8px;
-        border-radius: 999px;
-        background: rgba(26, 122, 191, 0.12);
-        color: #155f96;
-        font-family: "Segoe UI", Arial, sans-serif;
-        font-size: 14px;
-        font-weight: 700;
-      }
-      .mail-grid {
+      .grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 16px;
-        margin: 24px 0;
+        margin: 22px 0;
       }
-      .mail-box {
-        padding: 18px 18px 16px;
+      .box {
+        padding: 18px;
         border-radius: 14px;
         background: #f8fafc;
         border: 1px solid rgba(18, 52, 77, 0.08);
       }
-      .mail-box h3 {
+      .box h3 {
         margin: 0 0 8px;
         font-family: "Segoe UI", Arial, sans-serif;
         font-size: 14px;
@@ -86,71 +70,65 @@
         text-transform: uppercase;
         color: #155f96;
       }
-      .mail-box p,
-      .mail-box li {
+      .box p,
+      .box li {
         margin: 0;
         font-size: 15px;
       }
-      .mail-box ul {
+      .box ul {
         margin: 0;
         padding-left: 18px;
       }
-      .mail-note {
-        margin: 24px 0;
+      .note {
+        margin: 22px 0;
         padding: 18px 20px;
         border-left: 4px solid #1a7abf;
         background: rgba(26, 122, 191, 0.06);
         border-radius: 0 12px 12px 0;
       }
-      .mail-footer {
-        margin-top: 28px;
-        padding-top: 20px;
-        border-top: 1px solid rgba(31, 41, 51, 0.1);
+      .footer {
+        margin-top: 26px;
+        padding-top: 18px;
+        border-top: 1px solid rgba(36, 50, 63, 0.1);
         font-size: 14px;
         color: #52606d;
       }
-      .mail-footer strong {
-        color: #12344d;
+      .footer strong {
+        color: #113247;
       }
       a {
         color: #155f96;
       }
       @media (max-width: 720px) {
-        .mail-wrap {
+        .wrap {
           padding: 10px;
         }
-        .mail-hero,
-        .mail-body {
+        .hero,
+        .body {
           padding: 20px;
         }
-        .mail-grid {
+        .grid {
           grid-template-columns: 1fr;
         }
       }
     </style>
   </head>
   <body>
-    <div class="mail-wrap">
-      <div class="mail-card">
-        <div class="mail-hero">
-          <div class="mail-kicker">IES Puerto de la Cruz Telesforo Bravo</div>
-          <h1 class="mail-title">Colaboración formativa con {nombre_empresa}</h1>
-          <p class="mail-subtitle">
-            Nos ponemos en contacto con ustedes para valorar una posible colaboración en la formación práctica de nuestro alumnado.
-          </p>
+    <div class="wrap">
+      <div class="card">
+        <div class="hero">
+          <div class="kicker">IES Puerto de la Cruz Telesforo Bravo</div>
+          <h1 class="title">Información sobre formación en empresa</h1>
         </div>
-
-        <div class="mail-body">
+        <div class="body">
           <p>Buenos días,</p>
 
           <p>
-            Somos el IES Puerto de la Cruz y nos gustaría saber si
-            <span class="mail-highlight">{nombre_empresa}</span>
-            estaría interesado en acoger alumnado de nuestro centro para el desarrollo de su formación práctica.
+            Tal y como hemos acordado, les reenviamos de nuevo la información relativa a la formación en empresa de nuestro centro.
           </p>
 
-          <div class="mail-grid">
-            <div class="mail-box">
+          <div class="grid">
+            <div class="box">
               <h3>Ciclos que impartimos</h3>
               <ul>
                 <li><strong>ASIR</strong> · Administración de Sistemas Informáticos en Red</li>
@@ -158,15 +136,14 @@
                 <li><strong>DAW</strong> · Desarrollo de Aplicaciones Web</li>
               </ul>
             </div>
-
-            <div class="mail-box">
-              <h3>Calendario de prácticas</h3>
+            <div class="box">
+              <h3>Fechas de prácticas</h3>
               <p><strong>1º:</strong> {calendario_primero}</p>
               <p><strong>2º:</strong> {calendario_segundo}</p>
             </div>
           </div>
 
-          <div class="mail-box">
+          <div class="box">
             <h3>Perfiles de GitHub del alumnado</h3>
             <ul>
               <li><a href="https://github.com/xxx">https://github.com/xxx</a></li>
@@ -175,19 +152,17 @@
             </ul>
           </div>
 
-          <div class="mail-note">
-            Cabe señalar que, dada la naturaleza de nuestro sector y para facilitar su colaboración,
-            el alumnado podrá desarrollar la formación en su empresa de forma remota, siempre que ustedes así lo contemplen.
+          <div class="note">
+            Recordamos brevemente que, si su organización lo contempla, la formación en empresa puede desarrollarse también en modalidad remota.
           </div>
 
           <p>
-            Les agradeceríamos que, tanto si están interesados en colaborar con nosotros como si no,
-            nos lo hicieran saber respondiendo a este mismo correo cuando les sea posible.
+            Quedamos a su disposición para cualquier aclaración adicional.
           </p>
 
-          <p>Gracias por su consideración y quedamos atentos a su respuesta.</p>
+          <p>Reciban un cordial saludo,</p>
 
-          <div class="mail-footer">
+          <div class="footer">
             <strong>IES Puerto de la Cruz Telesforo Bravo</strong><br>
             C/ Las Cabezas, 7 · 38400 Puerto de la Cruz · Santa Cruz de Tenerife<br>
             <a href="mailto:38003999@gobiernodecanarias.org">38003999@gobiernodecanarias.org</a><br>
