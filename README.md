@@ -2,6 +2,8 @@
 
 Aplicación para gestionar un listado de empresas almacenado en un fichero `.ods` (hoja de cálculo de LibreOffice).
 
+**Demo online:** https://feoempresas-demo.streamlit.app/
+
 ## Qué hace
 
 Permite crear, ver, editar y eliminar registros de empresas desde una interfaz web que se abre en el navegador, sin necesidad de abrir LibreOffice. Los datos se guardan directamente en el fichero `empresas.ods`.
