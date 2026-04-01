@@ -14,6 +14,7 @@ from ods_handler import (
     read_empresas, write_empresas,
     read_interacciones, write_interacciones,
     read_num_estudiantes, write_num_estudiantes,
+    read_github_alumnado, write_github_alumnado,
     read_all_lookups,
 )
 
@@ -29,6 +30,8 @@ DEFAULT_APP_SETTINGS = {
     'festivos': [],
     'alternancia': [],
 }
+
+GITHUB_GRUPOS = ['1DAM', '2DAM', '1DAW', '2DAW', '1ASIR', '2ASIR']
 
 
 _LOOKUPS_VER = 3  # incrementar cuando cambie read_all_lookups()
@@ -89,6 +92,21 @@ def load_mail_templates():
                     data['html_body'] = ''
             templates.append(data)
     return templates
+
+
+def load_github_alumnado():
+    """Lee todos los enlaces GitHub del alumnado y los devuelve como DataFrame."""
+    rows = read_github_alumnado()
+    current_course = _current_academic_course_label()
+    df = pd.DataFrame(rows) if rows else pd.DataFrame(columns=['enlace', 'grupo', 'curso_academico'])
+    if 'curso_academico' not in df.columns:
+        df['curso_academico'] = current_course
+    df['curso_academico'] = df['curso_academico'].replace('', pd.NA).fillna(current_course).astype(str)
+    for column in ('enlace', 'grupo'):
+        if column not in df.columns:
+            df[column] = ''
+        df[column] = df[column].fillna('').astype(str)
+    return df
 
 
 def load_app_settings():
@@ -162,6 +180,15 @@ def save_num_estudiantes(df):
     st.session_state.ods_mtime = get_ods_mtime()
 
 
+def save_github_alumnado(df):
+    """Persiste el DataFrame de enlaces GitHub del alumnado en el ODS."""
+    if 'curso_academico' not in df.columns:
+        df['curso_academico'] = _current_academic_course_label()
+    df['curso_academico'] = df['curso_academico'].replace('', pd.NA).fillna(_current_academic_course_label()).astype(str)
+    write_github_alumnado(df.to_dict('records'))
+    st.session_state.ods_mtime = get_ods_mtime()
+
+
 def _has_duplicate_alumno_asignacion(df, empresa_id, grupo, anio, exclude_idx=None):
     """Comprueba si ya existe una asignación con la misma tupla `(grupo, año)` para la empresa dada."""
     filtered = df[df['id_empresa'] == empresa_id]
@@ -179,6 +206,13 @@ def _normalize_nombre(value):
     """Normaliza el nombre de empresa eliminando whitespace exterior y convirtiéndolo a mayúsculas."""
     normalized = _normalize_text(value)
     return normalized.upper() if isinstance(normalized, str) else normalized
+
+
+def _current_academic_course_label(today=None):
+    """Devuelve el curso académico actual con formato `YY-YY`."""
+    current = today or date.today()
+    start_year = current.year if current.month >= 9 else current.year - 1
+    return f"{start_year % 100:02d}-{(start_year + 1) % 100:02d}"
 
 
 def _idx(lst, val):
@@ -199,6 +233,54 @@ def _valid_url(url):
     return bool(re.match(r'^(https?:\/\/)?(www\.)?([a-zA-Z0-9-]+\.)+[a-zA-Z0-9]{2,}([\/\?#].*)?$', url))
 
 
+def _valid_github_url(url):
+    """Comprueba que el string tiene formato básico de perfil de GitHub."""
+    return bool(re.match(r'^(https?:\/\/)?(www\.)?github\.com\/[A-Za-z0-9](?:[A-Za-z0-9-]{0,38}[A-Za-z0-9])?\/?$', url))
+
+
+def _github_links_for_templates(df, academic_course):
+    """Devuelve la lista de enlaces GitHub del curso indicado en formatos texto y HTML."""
+    if df is None or df.empty:
+        empty_text = "Pendiente de completar."
+        empty_html = '<p style="margin:0; font-size:15px; line-height:1.6; color:#52606d;">Pendiente de completar.</p>'
+        return {'text': empty_text, 'html': empty_html}
+
+    filtered = df[df['curso_academico'].astype(str) == str(academic_course)].copy()
+    if filtered.empty:
+        empty_text = "Pendiente de completar."
+        empty_html = '<p style="margin:0; font-size:15px; line-height:1.6; color:#52606d;">Pendiente de completar.</p>'
+        return {'text': empty_text, 'html': empty_html}
+
+    filtered['grupo'] = filtered['grupo'].fillna('').astype(str)
+    filtered['enlace'] = filtered['enlace'].fillna('').astype(str)
+    filtered = filtered.sort_values(['grupo', 'enlace']).reset_index(drop=True)
+
+    text_lines = []
+    html_items = []
+    for _, record in filtered.iterrows():
+        grupo = _normalize_text(record.get('grupo', '')) or 'Sin grupo'
+        enlace = _normalize_text(record.get('enlace', '')) or ''
+        if not enlace:
+            continue
+        text_lines.append(f"- {grupo}: {enlace}")
+        enlace_esc = html.escape(enlace, quote=True)
+        grupo_esc = html.escape(grupo)
+        html_items.append(
+            f'<li><strong>{grupo_esc}</strong> · '
+            f'<a href="{enlace_esc}" style="color:#155f96; text-decoration:underline;">{enlace_esc}</a></li>'
+        )
+
+    if not text_lines:
+        empty_text = "Pendiente de completar."
+        empty_html = '<p style="margin:0; font-size:15px; line-height:1.6; color:#52606d;">Pendiente de completar.</p>'
+        return {'text': empty_text, 'html': empty_html}
+
+    return {
+        'text': '\n'.join(text_lines),
+        'html': f'<ul style="margin:0; padding-left:18px; font-size:15px; line-height:1.6;">{"".join(html_items)}</ul>',
+    }
+
+
 def _valid_phone(phone):
     """Comprueba que el string tiene formato básico de teléfono (con o sin prefijo internacional)."""
     return bool(re.match(r'^\+?[0-9]{9,13}$', phone))
@@ -207,12 +289,17 @@ def _valid_phone(phone):
 def _mail_template_context(row, destinatario, settings=None):
     """Construye el contexto base para rellenar una plantilla a partir de la empresa seleccionada."""
     config = settings or DEFAULT_APP_SETTINGS
+    current_course = _current_academic_course_label()
+    github_links = _github_links_for_templates(st.session_state.get('github_alumnado'), current_course)
     return {
         'nombre_empresa': _normalize_text(str(row.get('nombre', '') or '')) or '',
         'contacto': _normalize_text(str(row.get('contacto', '') or '')) or '',
         'profesor': _normalize_text(str(row.get('profesor', '') or '')) or '',
         'correo_destino': _normalize_text(destinatario) or '',
         'fecha_hoy': date.today().strftime('%d/%m/%Y'),
+        'curso_academico_actual': current_course,
+        'github_alumnado_texto': github_links['text'],
+        'github_alumnado_html': github_links['html'],
         'calendario_primero': _calendar_period_label(
             _parse_iso_date(config.get('calendario_primero_inicio', '')),
             _parse_iso_date(config.get('calendario_primero_fin', '')),
@@ -888,35 +975,74 @@ def empresa_form(key, defaults=None, lock_estado=False):
     _empty = {col: '' for col in st.session_state.df.columns} | {'estado': 'Empresa nueva'}
     d = defaults or _empty
     with st.form(key):
-        c1, c2 = st.columns(2)
-        with c1:
-            st.markdown("**Datos de la empresa**")
-            nombre        = st.text_input("Nombre empresa *", value=d.get('nombre', ''))
+        st.markdown("""
+        <style>
+        .ef-form-section {
+            font-size: .76rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            opacity: .68;
+            padding-bottom: 6px;
+            margin: 8px 0 10px 0;
+            border-bottom: 1px solid rgba(128,128,128,.1);
+        }
+        .ef-form-head {
+            font-size: 1.02rem;
+            font-weight: 700;
+            line-height: 1.15;
+            margin: 0 0 8px 0;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+
+        st.markdown(
+            f'<div class="ef-form-head">{html.escape(str(d.get("nombre", "") or "")) or "Nueva empresa"}</div>',
+            unsafe_allow_html=True,
+        )
+
+        st.markdown('<div class="ef-form-section">Situación</div>', unsafe_allow_html=True)
+        c_sit_1, c_sit_2 = st.columns(2)
+        with c_sit_1:
             if lock_estado:
                 st.text_input("Estado de la empresa", value=d.get('estado', ''), disabled=True)
                 estado = d.get('estado', '')
             else:
                 estado = st.selectbox("Estado de la empresa", lookups['estado_empresa'],
                                       index=_idx(lookups['estado_empresa'], d.get('estado')))
-            observaciones = st.text_area("Observaciones", value=d.get('observaciones', ''), height=80)
+            localidad = st.selectbox("Localidad", [''] + lookups['localizacion'],
+                                     index=_idx([''] + lookups['localizacion'], d.get('localidad')))
+        with c_sit_2:
+            regimen = st.selectbox("Régimen", [''] + lookups['regimen'],
+                                   index=_idx([''] + lookups['regimen'], d.get('regimen')))
+            profesor = st.selectbox("Profesor", [''] + lookups['profesor'],
+                                    index=_idx([''] + lookups['profesor'], d.get('profesor')))
+
+        st.markdown('<div class="ef-form-section">Datos generales de la empresa</div>', unsafe_allow_html=True)
+        c_emp_1, c_emp_2 = st.columns(2)
+        with c_emp_1:
+            nombre        = st.text_input("Nombre empresa *", value=d.get('nombre', ''))
             web           = st.text_input("Web", value=d.get('web', ''))
-            localidad     = st.selectbox("Localidad", [''] + lookups['localizacion'],
-                                         index=_idx([''] + lookups['localizacion'], d.get('localidad')))
             correo_emp    = st.text_input("Correo empresa", value=d.get('correo_empresa', ''))
+        with c_emp_2:
             tfno_emp      = st.text_input("Teléfono empresa", value=d.get('tfno_empresa', ''))
             ext_tfno      = st.text_input("Extensión", value=d.get('extension_tfno', ''))
-        with c2:
-            st.markdown("**Persona de contacto**")
+
+        st.markdown('<div class="ef-form-section">Persona de contacto</div>', unsafe_allow_html=True)
+        c_con_1, c_con_2 = st.columns(2)
+        with c_con_1:
             contacto      = st.text_input("Contacto", value=d.get('contacto', ''))
             correo_con    = st.text_input("Correo contacto", value=d.get('correo_contacto', ''))
+        with c_con_2:
             tfno_con      = st.text_input("Teléfono contacto", value=d.get('tfno_contacto', ''))
-            st.markdown("**Otros datos**")
+
+        st.markdown('<div class="ef-form-section">Notas</div>', unsafe_allow_html=True)
+        c_not_1, c_not_2 = st.columns(2)
+        with c_not_1:
             tecnologias   = st.text_area("Tecnologías", value=d.get('tecnologias', ''), height=80)
             descripcion   = st.text_area("Descripción", value=d.get('descripcion', ''), height=100)
-            regimen       = st.selectbox("Régimen", [''] + lookups['regimen'],
-                                         index=_idx([''] + lookups['regimen'], d.get('regimen')))
-            profesor      = st.selectbox("Profesor", [''] + lookups['profesor'],
-                                         index=_idx([''] + lookups['profesor'], d.get('profesor')))
+        with c_not_2:
+            observaciones = st.text_area("Observaciones", value=d.get('observaciones', ''), height=188)
 
         submitted = st.form_submit_button("Guardar")
         if submitted:
@@ -1003,6 +1129,7 @@ def empresa_ficha(row):
         return f'<div class="ef-field"><div class="ef-lbl">{label}</div>{val_html}</div>'
 
     # Valores
+    nombre    = _v('nombre')
     estado    = _v('estado')
     localidad = _v('localidad')
     regimen   = _v('regimen')
@@ -1040,6 +1167,11 @@ def empresa_ficha(row):
     st.markdown(f"""
 <style>
 .ef-wrap {{ margin-top:2px; }}
+.ef-head {{ margin-bottom:8px; }}
+.ef-name {{
+    font-size:1.08rem; font-weight:700; line-height:1.15;
+    margin:0;
+}}
 
 /* ── Situación ── */
 .ef-situacion {{
@@ -1070,8 +1202,8 @@ def empresa_ficha(row):
     padding:10px 14px;
 }}
 .ef-card-title {{
-    font-size:.68rem; font-weight:700; text-transform:uppercase;
-    letter-spacing:.08em; opacity:.4;
+    font-size:.76rem; font-weight:800; text-transform:uppercase;
+    letter-spacing:.08em; opacity:.68;
     padding-bottom:6px; margin-bottom:8px;
     border-bottom:1px solid rgba(128,128,128,.1);
 }}
@@ -1089,7 +1221,7 @@ def empresa_ficha(row):
 /* ── Campos ── */
 .ef-field {{ margin-bottom:7px; }}
 .ef-field:last-child {{ margin-bottom:0; }}
-.ef-lbl {{ font-size:.7rem; opacity:.7; margin-bottom:2px; }}
+.ef-lbl {{ font-size:.78rem; opacity:.82; margin-bottom:2px; }}
 .ef-val {{ font-size:.9rem; font-weight:500; line-height:1.45; word-break:break-word; }}
 .ef-empty {{ opacity:.28; font-style:italic; font-weight:400; }}
 .ef-ext {{ font-size:.8em; opacity:.55; }}
@@ -1097,6 +1229,10 @@ def empresa_ficha(row):
 </style>
 
 <div class="ef-wrap">
+
+  <div class="ef-head">
+    <div class="ef-name">{nombre or '<span class="ef-empty">Empresa sin nombre</span>'}</div>
+  </div>
 
   <div class="ef-situacion">
     {_sit_item('Estado',    estado)}
@@ -1439,6 +1575,137 @@ def dialog_eliminar_asignacion():
             st.rerun()
 
 
+@st.dialog("Añadir enlace GitHub", width="large")
+def dialog_nuevo_github_alumno():
+    """Abre un diálogo modal para añadir un enlace GitHub del alumnado con el curso actual bloqueado."""
+    current_course = _current_academic_course_label()
+
+    with st.form("form_add_github_alumno"):
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            enlace = st.text_input("Enlace GitHub", placeholder="https://github.com/usuario")
+        with c2:
+            grupo = st.selectbox("Grupo", GITHUB_GRUPOS)
+        with c3:
+            st.text_input("Curso académico", value=current_course, disabled=True)
+
+        if st.form_submit_button("Guardar", type="primary"):
+            normalized = {
+                'enlace': _normalize_text(enlace) or '',
+                'grupo': _normalize_text(grupo) or '',
+                'curso_academico': current_course,
+            }
+            if not normalized['enlace']:
+                st.error("⚠ El enlace GitHub es obligatorio.")
+                return
+            if not _valid_github_url(normalized['enlace']):
+                st.error("⚠ El enlace debe ser un perfil válido de GitHub. Ejemplo: https://github.com/usuario.")
+                return
+            duplicate = st.session_state.github_alumnado[
+                (st.session_state.github_alumnado['enlace'] == normalized['enlace'])
+                & (st.session_state.github_alumnado['curso_academico'] == normalized['curso_academico'])
+            ]
+            if not duplicate.empty:
+                st.error("⚠ Ya existe ese enlace GitHub para el curso académico actual.")
+                return
+
+            st.session_state.github_alumnado = pd.concat(
+                [st.session_state.github_alumnado, pd.DataFrame([normalized])],
+                ignore_index=True,
+            )
+            try:
+                save_github_alumnado(st.session_state.github_alumnado)
+                st.toast("Enlace GitHub añadido.")
+                st.rerun()
+            except Exception as e:
+                st.error(f"No se pudo guardar: {e}")
+
+
+@st.dialog("Editar enlace GitHub", width="large")
+def dialog_editar_github_alumno():
+    """Abre un diálogo modal para editar un enlace GitHub del alumnado manteniendo el curso bloqueado."""
+    orig_idx = st.session_state.get('_edit_github_idx')
+    if orig_idx is None or orig_idx not in st.session_state.github_alumnado.index:
+        st.error("El enlace seleccionado ya no está disponible.")
+        return
+
+    row = st.session_state.github_alumnado.loc[orig_idx]
+    current_course = str(row.get('curso_academico', '') or _current_academic_course_label())
+
+    with st.form("form_edit_github_alumno"):
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            enlace = st.text_input("Enlace GitHub", value=row.get('enlace', ''))
+        with c2:
+            grupo = st.selectbox("Grupo", GITHUB_GRUPOS, index=_idx(GITHUB_GRUPOS, row.get('grupo', '')))
+        with c3:
+            st.text_input("Curso académico", value=current_course, disabled=True)
+
+        if st.form_submit_button("Guardar cambios", type="primary"):
+            normalized_enlace = _normalize_text(enlace) or ''
+            if not normalized_enlace:
+                st.error("⚠ El enlace GitHub es obligatorio.")
+                return
+            if not _valid_github_url(normalized_enlace):
+                st.error("⚠ El enlace debe ser un perfil válido de GitHub. Ejemplo: https://github.com/usuario.")
+                return
+            duplicate = st.session_state.github_alumnado.drop(index=orig_idx, errors='ignore')
+            duplicate = duplicate[
+                (duplicate['enlace'] == normalized_enlace)
+                & (duplicate['curso_academico'].astype(str) == current_course)
+            ]
+            if not duplicate.empty:
+                st.error("⚠ Ya existe ese enlace GitHub para el mismo curso académico.")
+                return
+
+            st.session_state.github_alumnado.at[orig_idx, 'enlace'] = normalized_enlace
+            st.session_state.github_alumnado.at[orig_idx, 'grupo'] = _normalize_text(grupo) or ''
+            st.session_state.github_alumnado.at[orig_idx, 'curso_academico'] = current_course
+            try:
+                save_github_alumnado(st.session_state.github_alumnado)
+                st.toast("Enlace GitHub actualizado.")
+                st.rerun()
+            except Exception as e:
+                st.error(f"No se pudo guardar: {e}")
+
+
+@st.dialog("Eliminar enlace GitHub", width="small")
+def dialog_eliminar_github_alumno():
+    """Pide confirmación antes de eliminar un enlace GitHub del alumnado."""
+    orig_idx = st.session_state.get('_delete_github_idx')
+    if orig_idx is None or orig_idx not in st.session_state.github_alumnado.index:
+        st.error("El enlace seleccionado ya no está disponible.")
+        return
+
+    row = st.session_state.github_alumnado.loc[orig_idx]
+    enlace = html.escape(str(row.get('enlace', '') or ''))
+    grupo = html.escape(str(row.get('grupo', '') or ''))
+    curso = html.escape(str(row.get('curso_academico', '') or _current_academic_course_label()))
+    st.warning(f"¿Eliminar el enlace **{enlace}** del grupo **{grupo}** del curso **{curso}**?")
+    st.caption("Esta acción crea un backup automático antes de guardar.")
+
+    col_confirm, col_cancel = st.columns(2)
+    with col_confirm:
+        if st.button("Confirmar", type="primary", use_container_width=True):
+            st.session_state.github_alumnado = (
+                st.session_state.github_alumnado
+                .drop(index=orig_idx)
+                .reset_index(drop=True)
+            )
+            st.session_state.pop('_delete_github_idx', None)
+            st.session_state.pop('_sel_github_idx', None)
+            try:
+                save_github_alumnado(st.session_state.github_alumnado)
+                st.toast("Enlace GitHub eliminado.")
+                st.rerun()
+            except Exception as e:
+                st.error(f"No se pudo eliminar: {e}")
+    with col_cancel:
+        if st.button("Cancelar", use_container_width=True):
+            st.session_state.pop('_delete_github_idx', None)
+            st.rerun()
+
+
 @st.dialog("Añadir", width="large")
 def dialog_add_calendar_item():
     """Permite añadir formación, festivos o alternancia a la configuración de calendarios."""
@@ -1778,6 +2045,7 @@ if 'df' not in st.session_state:
         st.session_state.df = load_data()
         st.session_state.interacciones = load_interacciones()
         st.session_state.num_estudiantes = load_num_estudiantes()
+        st.session_state.github_alumnado = load_github_alumnado()
         st.session_state.ods_mtime = get_ods_mtime()
     except Exception as e:
         st.error(f"No se pudo cargar el fichero de datos: {e}")
@@ -1789,6 +2057,12 @@ if 'accion_int' not in st.session_state:
     st.session_state.accion_int = None
 if 'accion_alu' not in st.session_state:
     st.session_state.accion_alu = None
+if 'github_alumnado' not in st.session_state:
+    try:
+        st.session_state.github_alumnado = load_github_alumnado()
+    except Exception as e:
+        st.error(f"No se pudieron cargar los enlaces GitHub del alumnado: {e}")
+        st.stop()
 
 # ── Procesar resultado pendiente de un modal ─────────────────────────────────
 _pending = st.session_state.get('_dialog_action')
@@ -1833,6 +2107,7 @@ if st.session_state.get('ods_mtime') != current_ods_mtime:
         st.session_state.df = load_data()
         st.session_state.interacciones = load_interacciones()
         st.session_state.num_estudiantes = load_num_estudiantes()
+        st.session_state.github_alumnado = load_github_alumnado()
         st.session_state.ods_mtime = current_ods_mtime
     except Exception as e:
         st.error(f"No se pudo recargar el fichero de datos: {e}")
@@ -1846,18 +2121,41 @@ except Exception as e:
 df_all = st.session_state.df
 app_settings = load_app_settings()
 
+st.markdown("""
+<style>
+.emp-topbar {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin:0 0 6px 0;
+}
+.emp-topbar-title {
+    font-size:1.65rem;
+    font-weight:700;
+    line-height:1.1;
+    margin:0;
+}
+.emp-filter-note {
+    font-size:.8rem;
+    opacity:.72;
+    margin:0 0 4px 0;
+}
+</style>
+""", unsafe_allow_html=True)
+
 # ── Título ───────────────────────────────────────────────────────────────────
 col_t, col_b = st.columns([5, 1])
 with col_t:
-    st.title("Empresas")
+    st.markdown('<div class="emp-topbar-title">Empresas</div>', unsafe_allow_html=True)
 with col_b:
-    st.write("")
     if st.button("➕ Nueva empresa", use_container_width=True):
         dialog_nueva_empresa()
 
-tab_empresas, tab_gestion = st.tabs(["🏢 Empresas", "📅 Calendarios"])
+tab_empresas, tab_gestion = st.tabs(["🏢 Empresas", "⚙️ Gestión"])
 
 with tab_empresas:
+    st.markdown('<div class="emp-filter-note">Filtra y selecciona una empresa para ver su ficha.</div>', unsafe_allow_html=True)
     col1, col2, col3, col4 = st.columns([3, 2, 2, 2])
     with col1:
         nombres = sorted(df_all['nombre'].dropna().unique().tolist())
@@ -1903,7 +2201,7 @@ with tab_empresas:
         .astype({'interacciones': int, 'alumnos': int})
     )
 
-    st.write(f"**{len(df_view)}** empresa(s)")
+    st.caption(f"{len(df_view)} empresa(s)")
 
     selection = st.dataframe(
         df_view[['nombre', 'estado', 'localidad', 'regimen', 'profesor', 'interacciones', 'alumnos', 'web', 'descripcion']],
@@ -1911,15 +2209,19 @@ with tab_empresas:
         hide_index=False,
         on_select="rerun",
         selection_mode="single-row",
-        height=250,
+        height=205,
     )
 
     selected_row = None
-    if selection and selection.selection.rows:
-        selected_row = df_view.iloc[selection.selection.rows[0]]
-        st.session_state['_sel_id'] = str(selected_row['id_empresa'])
-    elif st.session_state.get('_sel_id'):
-        matching = df_view[df_view['id_empresa'] == st.session_state['_sel_id']]
+    if selection is not None:
+        if selection.selection.rows:
+            selected_row = df_view.iloc[selection.selection.rows[0]]
+            st.session_state['_sel_id'] = str(selected_row['id_empresa'])
+        else:
+            st.session_state.pop('_sel_id', None)
+
+    if selected_row is None and st.session_state.get('_sel_id'):
+        matching = df_view[df_view['id_empresa'].astype(str) == st.session_state['_sel_id']]
         if not matching.empty:
             selected_row = matching.iloc[0]
         else:
@@ -2108,64 +2410,113 @@ with tab_empresas:
         st.info("Selecciona una empresa en la tabla para ver su ficha.")
 
 with tab_gestion:
-    current_year = date.today().year
-    primero_inicio = _semester_date_or_none(
-        _parse_iso_date(app_settings.get('calendario_primero_inicio', '')),
-        current_year,
-    )
-    primero_fin = _semester_date_or_none(
-        _parse_iso_date(app_settings.get('calendario_primero_fin', '')),
-        current_year,
-    )
-    segundo_inicio = _semester_date_or_none(
-        _parse_iso_date(app_settings.get('calendario_segundo_inicio', '')),
-        current_year,
-    )
-    segundo_fin = _semester_date_or_none(
-        _parse_iso_date(app_settings.get('calendario_segundo_fin', '')),
-        current_year,
-    )
-    holiday_dates = _special_dates_for_year(app_settings, 'festivos', current_year)
-    alternancia_dates = _special_dates_for_year(app_settings, 'alternancia', current_year)
+    tab_calendarios, tab_github_alumnado = st.tabs(["📅 Calendarios", "🔗 GitHub alumnado"])
 
-    st.write("Ajusta el periodo de formación en empresa y revisa la vista previa al instante.")
-    semester_start = date(current_year, 1, 1)
-    semester_end = date(current_year, 6, 30)
-    st.session_state['_calendar_semester_start'] = semester_start
-    st.session_state['_calendar_semester_end'] = semester_end
-    st.session_state['_calendar_settings_snapshot'] = {
-        'primero_inicio': primero_inicio,
-        'primero_fin': primero_fin,
-        'segundo_inicio': segundo_inicio,
-        'segundo_fin': segundo_fin,
-        'holiday_dates': holiday_dates,
-        'alternancia_dates': alternancia_dates,
-    }
+    with tab_calendarios:
+        current_year = date.today().year
+        primero_inicio = _semester_date_or_none(
+            _parse_iso_date(app_settings.get('calendario_primero_inicio', '')),
+            current_year,
+        )
+        primero_fin = _semester_date_or_none(
+            _parse_iso_date(app_settings.get('calendario_primero_fin', '')),
+            current_year,
+        )
+        segundo_inicio = _semester_date_or_none(
+            _parse_iso_date(app_settings.get('calendario_segundo_inicio', '')),
+            current_year,
+        )
+        segundo_fin = _semester_date_or_none(
+            _parse_iso_date(app_settings.get('calendario_segundo_fin', '')),
+            current_year,
+        )
+        holiday_dates = _special_dates_for_year(app_settings, 'festivos', current_year)
+        alternancia_dates = _special_dates_for_year(app_settings, 'alternancia', current_year)
 
-    render_calendar_panel(
-        "Calendario de prácticas",
-        primero_inicio,
-        primero_fin,
-        segundo_inicio,
-        segundo_fin,
-        current_year,
-        holiday_dates,
-        alternancia_dates,
-    )
-    col_spacer, c_add, c_edit, c_delete = st.columns([6, 1, 1, 1])
-    with c_add:
-        if st.button("➕ Añadir", key="add_calendar_button", use_container_width=True):
-            dialog_add_calendar_item()
-    with c_edit:
-        if st.button("✏️ Editar", key="edit_calendar_button", use_container_width=True):
-            dialog_edit_calendar_item()
-    with c_delete:
-        if st.button("🗑️ Eliminar", key="delete_calendar_button", use_container_width=True):
-            dialog_delete_calendar_item()
+        st.write("Ajusta el periodo de formación en empresa y revisa la vista previa al instante.")
+        semester_start = date(current_year, 1, 1)
+        semester_end = date(current_year, 6, 30)
+        st.session_state['_calendar_semester_start'] = semester_start
+        st.session_state['_calendar_semester_end'] = semester_end
+        st.session_state['_calendar_settings_snapshot'] = {
+            'primero_inicio': primero_inicio,
+            'primero_fin': primero_fin,
+            'segundo_inicio': segundo_inicio,
+            'segundo_fin': segundo_fin,
+            'holiday_dates': holiday_dates,
+            'alternancia_dates': alternancia_dates,
+        }
 
-    st.caption(
-        "Variables disponibles para futuras plantillas: "
-        "{calendario_primero}, {calendario_segundo}, "
-        "{calendario_primero_inicio}, {calendario_primero_fin}, "
-        "{calendario_segundo_inicio}, {calendario_segundo_fin}."
-    )
+        render_calendar_panel(
+            "Calendario de prácticas",
+            primero_inicio,
+            primero_fin,
+            segundo_inicio,
+            segundo_fin,
+            current_year,
+            holiday_dates,
+            alternancia_dates,
+        )
+        col_spacer, c_add, c_edit, c_delete = st.columns([6, 1, 1, 1])
+        with c_add:
+            if st.button("➕ Añadir", key="add_calendar_button", use_container_width=True):
+                dialog_add_calendar_item()
+        with c_edit:
+            if st.button("✏️ Editar", key="edit_calendar_button", use_container_width=True):
+                dialog_edit_calendar_item()
+        with c_delete:
+            if st.button("🗑️ Eliminar", key="delete_calendar_button", use_container_width=True):
+                dialog_delete_calendar_item()
+
+        st.caption(
+            "Variables disponibles para futuras plantillas: "
+            "{calendario_primero}, {calendario_segundo}, "
+            "{calendario_primero_inicio}, {calendario_primero_fin}, "
+            "{calendario_segundo_inicio}, {calendario_segundo_fin}."
+        )
+
+    with tab_github_alumnado:
+        current_course = _current_academic_course_label()
+        st.write("Gestiona los perfiles de GitHub del alumnado del curso académico actual.")
+        st.caption(f"Curso académico actual: {current_course}")
+
+        df_github = st.session_state.github_alumnado.copy()
+        if df_github.empty:
+            st.caption("No hay enlaces GitHub registrados.")
+            sel_github = None
+        else:
+            df_github_view = df_github.reset_index()
+            sel_github = st.dataframe(
+                df_github_view[['enlace', 'grupo', 'curso_academico']],
+                use_container_width=True,
+                hide_index=False,
+                on_select="rerun",
+                selection_mode="single-row",
+                height=240,
+            )
+            if sel_github and sel_github.selection.rows:
+                pos = sel_github.selection.rows[0]
+                st.session_state['_sel_github_idx'] = int(df_github_view.iloc[pos]['index'])
+            else:
+                st.session_state.pop('_sel_github_idx', None)
+
+        orig_idx_github = st.session_state.get('_sel_github_idx')
+        sel_github_row = (
+            st.session_state.github_alumnado.loc[orig_idx_github]
+            if orig_idx_github is not None and orig_idx_github in st.session_state.github_alumnado.index
+            else None
+        )
+
+        col_spacer, c_add, c_edit, c_delete = st.columns([5.5, 1, 1, 1])
+        with c_add:
+            if st.button("➕ Añadir", key="btn_add_github", use_container_width=True):
+                st.session_state.pop('_sel_github_idx', None)
+                dialog_nuevo_github_alumno()
+        with c_edit:
+            if st.button("✏️ Editar", key="btn_edit_github", use_container_width=True, disabled=sel_github_row is None):
+                st.session_state._edit_github_idx = orig_idx_github
+                dialog_editar_github_alumno()
+        with c_delete:
+            if st.button("🗑️ Eliminar", key="btn_delete_github", use_container_width=True, disabled=sel_github_row is None):
+                st.session_state._delete_github_idx = orig_idx_github
+                dialog_eliminar_github_alumno()

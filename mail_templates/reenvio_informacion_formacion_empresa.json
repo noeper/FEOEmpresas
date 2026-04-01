@@ -1,7 +1,7 @@
 {
   "id": "reenvio_informacion_formacion_empresa",
   "label": "Reenvío información formación empresa",
-  "subject": "Información sobre formación en empresa - {nombre_empresa}",
+  "subject": "IES Puerto de la Cruz · Información sobre formación en empresa - {nombre_empresa}",
   "body": "Buenos días:\n\nTal y como hemos acordado, les reenviamos de nuevo la información relativa a la formación en empresa de nuestro centro.\n\nImpartimos los siguientes ciclos de informática:\n\nASIR · Administración de Sistemas Informáticos en Red.\nDAM · Desarrollo de Aplicaciones Multiplataforma.\nDAW · Desarrollo de Aplicaciones Web.\n\nFechas de prácticas:\n\n1º: {calendario_primero}\n2º: {calendario_segundo}\n\nPerfiles de GitHub del alumnado:\n\nhttps://github.com/xxx\nhttps://github.com/yyy\nhttps://github.com/zzz\n\nRecordamos brevemente que, si su organización lo contempla, la formación en empresa puede desarrollarse también en modalidad remota.\n\nQuedamos a su disposición para cualquier aclaración adicional.\n\nReciban un cordial saludo,\n\nIES Puerto de la Cruz Telesforo Bravo\nC/ Las Cabezas, 7\n38400 Puerto de la Cruz\nSanta Cruz de Tenerife\n\n38003999@gobiernodecanarias.org\nhttps://iespto.es/\n922 38 01 12",
   "html_file": "reenvio_informacion_formacion_empresa.html"
 }

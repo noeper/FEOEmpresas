@@ -1,7 +1,7 @@
 {
   "id": "seguimiento_en_unos_meses",
   "label": "Seguimiento en unos meses",
-  "subject": "Gracias por su respuesta, {nombre_empresa}",
+  "subject": "IES Puerto de la Cruz · Gracias por su respuesta, {nombre_empresa}",
   "body": "Buenos días:\n\nMuchas gracias por su respuesta y por la atención prestada a nuestra propuesta de colaboración con {nombre_empresa}.\n\nEntendemos perfectamente que en este momento tengan cubierto el cupo de alumnado.\n\nSi les parece bien, volveremos a contactar con ustedes dentro de unos meses para comprobar si en ese momento pudiera surgir la posibilidad de colaborar, por ejemplo con alumnado de 1º.\n\nOjalá más adelante haya ocasión de que esta colaboración pueda materializarse.\n\nReciban un cordial saludo,\n\nIES Puerto de la Cruz Telesforo Bravo\nC/ Las Cabezas, 7\n38400 Puerto de la Cruz\nSanta Cruz de Tenerife\n\n38003999@gobiernodecanarias.org\nhttps://iespto.es/\n922 38 01 12",
   "html_file": "seguimiento_en_unos_meses.html"
 }

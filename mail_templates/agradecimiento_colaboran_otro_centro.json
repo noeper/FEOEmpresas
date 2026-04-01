@@ -1,7 +1,7 @@
 {
   "id": "agradecimiento_colaboran_otro_centro",
   "label": "Agradecimiento colaboración con otro centro",
-  "subject": "Gracias por su respuesta, {nombre_empresa}",
+  "subject": "IES Puerto de la Cruz · Gracias por su respuesta, {nombre_empresa}",
   "body": "Buenos días:\n\nMuchas gracias por su respuesta y por la atención prestada a nuestra propuesta de colaboración con {nombre_empresa}.\n\nNos alegra saber que ya están colaborando con la formación de jóvenes a través de otro centro. Valoramos muy positivamente ese compromiso con el desarrollo profesional del alumnado.\n\nLes deseamos mucho éxito en sus proyectos presentes y futuros.\n\nReciban un cordial saludo,\n\nIES Puerto de la Cruz Telesforo Bravo\nC/ Las Cabezas, 7\n38400 Puerto de la Cruz\nSanta Cruz de Tenerife\n\n38003999@gobiernodecanarias.org\nhttps://iespto.es/\n922 38 01 12",
   "html_file": "agradecimiento_colaboran_otro_centro.html"
 }

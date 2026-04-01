@@ -31,6 +31,8 @@ COLUMNS = [
 
 INTERACCIONES_COLS = ['id_empresa', 'tipo', 'descripcion', 'fecha', 'profesor']
 NUM_ESTUDIANTES_COLS = ['id_empresa', 'num_alumnos', 'grupo', 'anio']
+GITHUB_ALUMNADO_SHEET = 'GitHub_alumnado'
+GITHUB_ALUMNADO_COLS = ['enlace', 'grupo', 'curso_academico']
 
 
 def _cell_value(cell):
@@ -78,6 +80,26 @@ def _replace_sheet_header(sheet, headers):
     if rows:
         sheet.removeChild(rows[0])
     sheet.insertBefore(_make_row(headers), sheet.firstChild)
+
+
+def _get_sheet_by_name(doc, sheet_name):
+    """Devuelve la hoja con el nombre indicado o `None` si no existe."""
+    for sheet in doc.spreadsheet.getElementsByType(Table):
+        if sheet.getAttribute('name') == sheet_name:
+            return sheet
+    return None
+
+
+def _get_or_create_sheet(doc, sheet_name, headers):
+    """Devuelve la hoja pedida y la crea con cabecera si aún no existe."""
+    sheet = _get_sheet_by_name(doc, sheet_name)
+    if sheet is not None:
+        return sheet
+
+    sheet = Table(name=sheet_name)
+    sheet.addElement(_make_row(headers))
+    doc.spreadsheet.addElement(sheet)
+    return sheet
 
 
 def read_empresas():
@@ -208,6 +230,43 @@ def write_num_estudiantes(registros):
 
     for registro in registros:
         vals = [registro.get(col, '') or '' for col in NUM_ESTUDIANTES_COLS]
+        sheet.addElement(_make_row(vals))
+
+    doc.save(ODS_PATH)
+
+
+def read_github_alumnado():
+    """Devuelve todos los enlaces GitHub del alumnado como lista de dicts. Omite filas vacías."""
+    doc = load(ODS_PATH)
+    sheet = _get_sheet_by_name(doc, GITHUB_ALUMNADO_SHEET)
+    if sheet is None:
+        return []
+
+    rows = sheet.getElementsByType(TableRow)
+    result = []
+    for row in rows[1:]:
+        vals = _row_to_list(row, len(GITHUB_ALUMNADO_COLS))
+        if any(vals):
+            result.append(dict(zip(GITHUB_ALUMNADO_COLS, vals)))
+    return result
+
+
+def write_github_alumnado(registros):
+    """Sobrescribe la hoja GitHub_alumnado con la lista recibida. Crea backup antes de guardar."""
+    _create_ods_backup()
+
+    doc = load(ODS_PATH)
+    sheet = _get_or_create_sheet(doc, GITHUB_ALUMNADO_SHEET, ['ENLACE', 'GRUPO', 'CURSO_ACADEMICO'])
+    rows = sheet.getElementsByType(TableRow)
+
+    _replace_sheet_header(sheet, ['ENLACE', 'GRUPO', 'CURSO_ACADEMICO'])
+    rows = sheet.getElementsByType(TableRow)
+
+    for row in list(rows[1:]):
+        sheet.removeChild(row)
+
+    for registro in registros:
+        vals = [registro.get(col, '') or '' for col in GITHUB_ALUMNADO_COLS]
         sheet.addElement(_make_row(vals))
 
     doc.save(ODS_PATH)
